@@ -1,0 +1,57 @@
+server:
+  port: 8081
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+spring:
+  application:
+    name: food-service
+
+  data:
+    mongodb:
+      uri: "mongodb+srv://huyle842005:${MONGO_PASSWORD}@cluster0.b0bspno.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+      database: food-app
+
+  jpa:
+    hibernate:
+      ddl-auto: update # hoặc validate / none tùy môi trường
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  # Nếu dùng Spring Cloud Config
+  # config:
+  #   import: "optional:configserver:http://localhost:8888"
+
+  # Nếu dùng Kafka:
+  # kafka:
+  #   bootstrap-servers: localhost:9092
+  #   consumer:
+  #     group-id: menu-service-group
+  #     auto-offset-reset: earliest
+
+  # Nếu dùng Eureka:
+  # cloud:
+  #   discovery:
+  #     enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.yourcompany.menuservice: DEBUG
+
+# Custom configs nếu có
+menu-service:
+  cache-enabled: false
