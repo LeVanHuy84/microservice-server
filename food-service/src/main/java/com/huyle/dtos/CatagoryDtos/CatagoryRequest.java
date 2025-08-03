@@ -1,4 +1,4 @@
-package com.huyle.dtos.FoodDtos;
+package com.huyle.dtos.CatagoryDtos;
 
 public record CatagoryRequest(
     String name

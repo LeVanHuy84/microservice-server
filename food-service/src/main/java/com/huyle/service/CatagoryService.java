@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.huyle.dtos.FoodDtos.CatagoryRequest;
-import com.huyle.dtos.FoodDtos.CatagoryResponse;
+import com.huyle.dtos.CatagoryDtos.CatagoryRequest;
+import com.huyle.dtos.CatagoryDtos.CatagoryResponse;
 import com.huyle.mappers.CatagoryMapper;
 import com.huyle.models.Catagory;
 import com.huyle.repositories.CatagoryRepository;

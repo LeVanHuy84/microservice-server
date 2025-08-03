@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import com.huyle.utils.ImageInfo;
 
@@ -23,7 +25,10 @@ public class Food {
     private String id;
     private String name;
     private String description;
+
+    @Field(targetType = FieldType.DECIMAL128)
     private BigDecimal basePrice;
+    
     private List<ImageInfo> images;
     private String categoryId;
     private String restaurantId;
@@ -31,4 +36,11 @@ public class Food {
     @Builder.Default
     private boolean available = true;
 
+    private double totalRating;
+
+    @Builder.Default
+    private int totalFeedback = 0;
+
+    @Builder.Default
+    private int totalOrder = 0;
 }

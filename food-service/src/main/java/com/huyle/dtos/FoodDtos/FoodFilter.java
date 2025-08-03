@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class FoodFilter {
-    private boolean available = true;
+    private Boolean available;
     private String name;
     private String categoryId;
     private Double minPrice;

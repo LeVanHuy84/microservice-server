@@ -2,7 +2,6 @@ package com.huyle.controllers;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.huyle.dtos.PagedResponse;
 import com.huyle.dtos.FoodDtos.FoodDetailResponse;
 import com.huyle.dtos.FoodDtos.FoodFilter;
 import com.huyle.dtos.FoodDtos.FoodRequest;
@@ -41,8 +41,8 @@ public class FoodController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<FoodSummaryResponse>> filterFoods(@ModelAttribute FoodFilter request) {
-        Page<FoodSummaryResponse> result = foodService.searchFoods(request);
+    public ResponseEntity<PagedResponse<FoodSummaryResponse>> filterFoods(@ModelAttribute FoodFilter request) {
+        PagedResponse<FoodSummaryResponse> result = foodService.searchFoods(request);
         return ResponseEntity.ok(result);
     }
 

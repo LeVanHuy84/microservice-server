@@ -15,6 +15,7 @@
 	<modules>
 		<module>food-service</module>
 		<module>common-exception-lib</module>
+		<module>order-service</module>
 	</modules>
 	<name>microservice-server</name>
 	<description>Microservice for food app</description>

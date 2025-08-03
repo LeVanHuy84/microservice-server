@@ -13,6 +13,7 @@ import com.huyle.dtos.FilterRequest;
 
 public class MongoQueryBuilder {
 
+    @SuppressWarnings("CollectionsToArray")
     public static Query build(FilterRequest filterRequest) {
         Query query = new Query();
         List<Criteria> criteriaList = new ArrayList<>();

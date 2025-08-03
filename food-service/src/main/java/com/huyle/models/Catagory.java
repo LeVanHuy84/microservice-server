@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Document(collection = "menus")
+@Document(collection = "catagories")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

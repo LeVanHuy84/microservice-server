@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.huyle.dtos.PagedResponse;
 import com.huyle.dtos.FoodDtos.FoodDetailResponse;
 import com.huyle.dtos.FoodDtos.FoodFilter;
 import com.huyle.dtos.FoodDtos.FoodRequest;
@@ -36,9 +37,19 @@ public class FoodService {
         return foodMapper.toSumaryResponses(topFoods);
     }
 
-    public Page<FoodSummaryResponse> searchFoods(FoodFilter request) {
+    public PagedResponse<FoodSummaryResponse> searchFoods(FoodFilter request) {
         Page<Food> page = foodRepositoryCustom.searchFoods(request);
-        return page.map(foodMapper::toSumaryResponse);
+
+        PagedResponse<FoodSummaryResponse> response = new PagedResponse<>(
+            page.getContent().stream()
+                .map(foodMapper::toSumaryResponse)
+                .toList(),
+            page.getNumber(),
+            page.getSize(),
+            page.getTotalElements(),
+            page.getTotalPages()
+        );
+        return response;
     }
 
     public FoodDetailResponse getFoodDetailById(String id) {

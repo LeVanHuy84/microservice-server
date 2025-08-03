@@ -20,7 +20,7 @@ public interface FoodMapper {
 
     Food toEntity(FoodRequest dto);
 
-    @Mapping(target = "imageUrl", expression = "java(mapImageUrls(entity.getImages()))")
+    @Mapping(target = "imageUrls", expression = "java(mapImageUrls(entity.getImages()))")
     FoodDetailResponse toFoodDetailResponse(Food entity);
 
     @Mapping(target = "imageUrl", expression = "java(getFirstImageUrl(entity.getImages()))")

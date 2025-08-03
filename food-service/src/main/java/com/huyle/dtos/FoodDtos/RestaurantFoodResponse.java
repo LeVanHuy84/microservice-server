@@ -11,9 +11,12 @@ public record RestaurantFoodResponse(
     String description,
     BigDecimal basePrice,
     List<ImageInfo> images,
-    String category,
+    String categoryId,
     String restaurantId,
-    boolean available
+    boolean available,
+    double totalRating,
+    int totalFeedback,
+    int totalOrder
 ) {
 
 }

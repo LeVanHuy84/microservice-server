@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.huyle.dtos.FoodDtos.CatagoryRequest;
-import com.huyle.dtos.FoodDtos.CatagoryResponse;
+import com.huyle.dtos.CatagoryDtos.CatagoryRequest;
+import com.huyle.dtos.CatagoryDtos.CatagoryResponse;
 import com.huyle.service.CatagoryService;
 
 import lombok.RequiredArgsConstructor;

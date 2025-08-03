@@ -1,18 +1,15 @@
 server:
-  port: 8082
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+  port: 8083
 
 spring:
   application:
-    name: food-service
+    name: order-service
 
-  data:
-    mongodb:
-      uri: "mongodb+srv://huyle842005:${MONGO_PASSWORD}@cluster0.b0bspno.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-      database: food-app
+  datasource:
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -53,5 +50,5 @@ logging:
     com.yourcompany.menuservice: DEBUG
 
 # Custom configs nếu có
-food-service:
+order-service:
   cache-enabled: false
