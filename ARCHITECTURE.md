@@ -25,15 +25,15 @@ flowchart LR
 
     subgraph Core[Core Services]
         RiderService[Rider Service]
-        DriverAssign[Driver Assignment Service]
-        LocationService[Location Service]
+        TripService[Trip Service]
+        DriverService[Driver Service]
         NotificationService[Notification Service]
     end
 
     subgraph Messaging[Queues & Kafka]
         Kafka[(Kafka)]
-        DriverAssignQ[(Driver Assignment Queue)]
-        LocationQ[(Location Queue)]
+        TripQueue[(Trip Queue)]
+        DriverLocQueue[(Driver Location Queue)]
     end
 
     subgraph Storage[Storage & Cache]
@@ -56,24 +56,24 @@ flowchart LR
     AuthService --> DB
 
     Gateway --> RiderService
-    Gateway --> DriverAssign
-    Gateway --> LocationService
+    Gateway --> TripService
+    Gateway --> DriverService
 
     RiderService --> Kafka
     Kafka --> Mapping
-    Kafka --> DriverAssignQ
+    Kafka --> TripQueue
 
-    DriverAssignQ --> DriverAssign
-    DriverAssign --> RedisLock
-    DriverAssign --> DB
-    DriverAssign --> NotificationService
+    TripQueue --> TripService
+    TripService --> RedisLock
+    TripService --> DB
+    TripService --> NotificationService
 
     NotificationService --> DriverWS
     NotificationService --> RiderWS
 
-    DriverWS --> LocationQ
-    LocationQ --> LocationService
-    LocationService --> RedisGeo
+    DriverWS --> DriverLocQueue
+    DriverLocQueue --> DriverService
+    DriverService --> RedisGeo
 ```
 
 ### 🔍 Mô tả:
