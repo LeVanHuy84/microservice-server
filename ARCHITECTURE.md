@@ -4,76 +4,33 @@
 
 ```mermaid
 flowchart LR
-    subgraph Clients
-        RiderApp[Rider App]
-        DriverApp[Driver App]
+    subgraph Client["📱 Client Apps"]
+        RiderApp["Rider App"]
+        DriverApp["Driver App"]
     end
 
-    subgraph GatewayLayer[API Gateway]
-        Gateway[Gateway]
+    subgraph Services["🧱 Microservices Layer"]
+        US["UserService\n(Register/Login/Profile)\nPostgreSQL"]
+        TS["TripService\n(Create/Cancel Trip)\nPostgreSQL/MongoDB"]
+        DS["DriverService\n(Location + Status)\nRedis Geo / DynamoDB"]
     end
 
-    subgraph WebSockets[WebSocket Layer]
-        RiderWS[Rider WebSocket Server]
-        DriverWS[Driver WebSocket Server]
+    subgraph DB["🗄️ Databases"]
+        PSQL["PostgreSQL"]
+        REDIS["Redis / DynamoDB"]
     end
 
-    subgraph UserManagement[User & Auth Services]
-        UserService[User Service]
-        AuthService[Auth Service]
-    end
+    RiderApp -->|"POST /users, /sessions"| US
+    DriverApp -->|"POST /users, /sessions"| US
+    RiderApp -->|"POST /trips"| TS
+    TS -->|"GET /drivers/search"| DS
+    DS --> REDIS
+    US --> PSQL
+    TS --> PSQL
+    RiderApp <-->|"GET /trips/{id}"| TS
+    RiderApp <-->|"Trip updates (polling)"| TS
+    DriverApp -->|"PUT /drivers/{id}/location"| DS
 
-    subgraph Core[Core Services]
-        RiderService[Rider Service]
-        TripService[Trip Service]
-        DriverService[Driver Service]
-        NotificationService[Notification Service]
-    end
-
-    subgraph Messaging[Queues & Kafka]
-        Kafka[(Kafka)]
-        TripQueue[(Trip Queue)]
-        DriverLocQueue[(Driver Location Queue)]
-    end
-
-    subgraph Storage[Storage & Cache]
-        DB[(PostgreSQL)]
-        RedisGeo[(Redis Geo - Driver Location Cache)]
-        RedisLock[(Redis - Distributed Lock)]
-    end
-
-    subgraph External[External Integrations]
-        Mapping[Third Party Mapping Service]
-    end
-
-    RiderApp --> Gateway
-    DriverApp --> Gateway
-
-    Gateway --> RiderWS
-    Gateway --> DriverWS
-    Gateway --> UserService
-    UserService --> AuthService
-    AuthService --> DB
-
-    Gateway --> RiderService
-    Gateway --> TripService
-    Gateway --> DriverService
-
-    RiderService --> Kafka
-    Kafka --> Mapping
-    Kafka --> TripQueue
-
-    TripQueue --> TripService
-    TripService --> RedisLock
-    TripService --> DB
-    TripService --> NotificationService
-
-    NotificationService --> DriverWS
-    NotificationService --> RiderWS
-
-    DriverWS --> DriverLocQueue
-    DriverLocQueue --> DriverService
-    DriverService --> RedisGeo
 ```
 
 ### 🔍 Mô tả:
@@ -91,22 +48,60 @@ Hệ thống tuân thủ nguyên tắc **Database per Service**, giúp đảm b�
 ## 2. Sơ đồ Chi tiết cho Module A - Scalability & Performance
 
 ```mermaid
-flowchart LR
-  subgraph Passenger Flow
-    A[User App] -->|POST /trips| TS[TripService]
-  end
+flowchart TB
+    subgraph Client["📱 Client Layer"]
+        RiderApp["Rider App\n(Realtime via WebSocket)"]
+        DriverApp["Driver App\n(Realtime via WebSocket)"]
+    end
 
-  TS -->|publish event| MQ[(Redis Stream / SQS)]
-  MQ -->|consume| DS[DriverService]
-  DS -->|write| RG[(Redis Geo - Location Cache)]
-  DS -->|batch sync| DDB[(Driver DB - Postgres)]
-  DS -->|publish| EB[(Event Bus - Analytics / Monitoring)]
-  TS -->|cache lookup| C[(Redis Cache Layer)]
+    subgraph Gateway["🚪 API Gateway / Load Balancer"]
+        GW["API Gateway\n(Auth, Routing, Rate Limit)"]
+    end
 
-  subgraph Monitoring
-    TS --> P[(Prometheus Metrics)]
-    DS --> J[(Jaeger Tracing)]
-  end
+    subgraph Async["🕓 Event Streaming Layer"]
+        MQ1["SQS / Kafka\n(Trip Requests)"]
+        MQ2["SQS / Kafka\n(Location Updates)"]
+    end
+
+    subgraph Core["🧩 Core Services"]
+        US["UserService\n(PostgreSQL + Read Replica)"]
+        TS["TripService\nHandles Trips\nAsync via MQ1"]
+        DS["DriverService\nRealtime Location\nAsync via MQ2\n(ElastiCache Redis Geo)"]
+        NS["NotificationService\nWebSocket / Push Notification"]
+    end
+
+    subgraph Infra["☁️ Infrastructure Layer"]
+        Cache["ElastiCache / Redis Cluster\n(Caching, Distributed Lock)"]
+        DB["PostgreSQL Cluster\n(Read/Write Split)"]
+        AutoScale["Auto Scaling Group\n(ECS/K8s)"]
+        Monitoring["Monitoring & Load Testing\n(k6 / JMeter + Grafana)"]
+    end
+
+    RiderApp --> GW
+    DriverApp --> GW
+    GW --> US
+    GW --> TS
+    GW --> DS
+
+    TS --> MQ1
+    MQ1 --> DS
+    DS --> MQ2
+    MQ2 --> TS
+
+    TS --> NS
+    NS --> RiderApp
+    NS --> DriverApp
+
+    US --> DB
+    TS --> DB
+    DS --> Cache
+
+    TS -.-> Cache
+    DS -.-> AutoScale
+    TS -.-> AutoScale
+    US -.-> AutoScale
+    AutoScale -.-> Monitoring
+
 ```
 
 ### ⚙️ Mô tả:
