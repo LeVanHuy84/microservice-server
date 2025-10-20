@@ -4,32 +4,45 @@
 
 ```mermaid
 flowchart LR
-    subgraph Client["📱 Client Apps"]
-        RiderApp["Rider App"]
-        DriverApp["Driver App"]
+    %% ========== CLIENT APPS ==========
+    subgraph Client["📱 Client Applications"]
+        direction TB
+        RiderApp["🚗 Rider App"]
+        DriverApp["🧭 Driver App"]
     end
 
+    %% ========== SERVICES LAYER ==========
     subgraph Services["🧱 Microservices Layer"]
-        US["UserService\n(Register/Login/Profile)\nPostgreSQL"]
-        TS["TripService\n(Create/Cancel Trip)\nPostgreSQL/MongoDB"]
-        DS["DriverService\n(Location + Status)\nRedis Geo / DynamoDB"]
+        direction TB
+        US["👤 User Service<br/>(Register / Login / Profile)<br/>🗃️ PostgreSQL"]
+        TS["🧾 Trip Service<br/>(Create / Manage / Cancel Trips)<br/>🗃️ PostgreSQL / MongoDB"]
+        DS["🚘 Driver Service<br/>(Update Location / Availability)<br/>⚡ Redis Geo / DynamoDB"]
     end
 
+    %% ========== DATABASES ==========
     subgraph DB["🗄️ Databases"]
-        PSQL["PostgreSQL"]
-        REDIS["Redis / DynamoDB"]
+        direction TB
+        PSQL["🐘 PostgreSQL"]
+        REDIS["🧠 Redis / 🧭 DynamoDB"]
     end
 
+    %% ========== CLIENT ↔ SERVICES ==========
     RiderApp -->|"POST /users, /sessions"| US
     DriverApp -->|"POST /users, /sessions"| US
+
     RiderApp -->|"POST /trips"| TS
+    RiderApp <-->|"GET /trips/{id}"| TS
+    RiderApp <-->|"Trip updates (polling or WebSocket)"| TS
+
+    DriverApp -->|"PUT /drivers/{id}/location"| DS
+
+    %% ========== SERVICES ↔ SERVICES ==========
     TS -->|"GET /drivers/search"| DS
-    DS --> REDIS
+
+    %% ========== SERVICES ↔ DATABASES ==========
     US --> PSQL
     TS --> PSQL
-    RiderApp <-->|"GET /trips/{id}"| TS
-    RiderApp <-->|"Trip updates (polling)"| TS
-    DriverApp -->|"PUT /drivers/{id}/location"| DS
+    DS --> REDIS
 
 ```
 
@@ -50,31 +63,31 @@ Hệ thống tuân thủ nguyên tắc **Database per Service**, giúp đảm b�
 ```mermaid
 flowchart TB
     subgraph Client["📱 Client Layer"]
-        RiderApp["Rider App\n(Realtime via WebSocket)"]
-        DriverApp["Driver App\n(Realtime via WebSocket)"]
+        RiderApp["Rider App<br/>(Realtime via WebSocket)"]
+        DriverApp["Driver App<br/>(Realtime via WebSocket)"]
     end
 
     subgraph Gateway["🚪 API Gateway / Load Balancer"]
-        GW["API Gateway\n(Auth, Routing, Rate Limit)"]
+        GW["API Gateway<br/>(Auth, Routing, Rate Limit)"]
     end
 
     subgraph Async["🕓 Event Streaming Layer"]
-        MQ1["SQS / Kafka\n(Trip Requests)"]
-        MQ2["SQS / Kafka\n(Location Updates)"]
+        MQ1["SQS / Kafka<br/>(Trip Requests)"]
+        MQ2["SQS / Kafka<br/>(Location Updates)"]
     end
 
     subgraph Core["🧩 Core Services"]
-        US["UserService\n(PostgreSQL + Read Replica)"]
-        TS["TripService\nHandles Trips\nAsync via MQ1"]
-        DS["DriverService\nRealtime Location\nAsync via MQ2\n(ElastiCache Redis Geo)"]
-        NS["NotificationService\nWebSocket / Push Notification"]
+        US["UserService<br/>(PostgreSQL + Read Replica)"]
+        TS["TripService<br/>Handles Trips<br/>Async via MQ1"]
+        DS["DriverService<br/>Realtime Location<br/>Async via MQ2<br/>(ElastiCache Redis Geo)"]
+        NS["NotificationService<br/>WebSocket / Push Notification"]
     end
 
     subgraph Infra["☁️ Infrastructure Layer"]
-        Cache["ElastiCache / Redis Cluster\n(Caching, Distributed Lock)"]
-        DB["PostgreSQL Cluster\n(Read/Write Split)"]
-        AutoScale["Auto Scaling Group\n(ECS/K8s)"]
-        Monitoring["Monitoring & Load Testing\n(k6 / JMeter + Grafana)"]
+        Cache["ElastiCache / Redis Cluster<br/>(Caching, Distributed Lock)"]
+        DB["PostgreSQL Cluster<br/>(Read/Write Split)"]
+        AutoScale["Auto Scaling Group<br/>(ECS/K8s)"]
+        Monitoring["Monitoring & Load Testing<br/>(k6 / JMeter + Grafana)"]
     end
 
     RiderApp --> GW
@@ -101,7 +114,6 @@ flowchart TB
     TS -.-> AutoScale
     US -.-> AutoScale
     AutoScale -.-> Monitoring
-
 ```
 
 ### ⚙️ Mô tả:
