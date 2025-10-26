@@ -124,16 +124,19 @@ Luồng này mô phỏng quy trình **đặt ghế xem phim realtime** giữa nh
 sequenceDiagram
     participant Client
     participant Gateway
-    participant Redis
+    participant RedisPubSub
+    participant RedisCache
+    participant RedisAdapter
     participant CinemaService
 
-    Client->>Gateway: emit("hold_seat", {showtimeId, seatId})
-    Gateway->>Redis: publish("gateway.hold_seat", {...})
-    Redis->>CinemaService: subscribe("gateway.hold_seat")
-    CinemaService->>Redis: set hold:* keys
-    CinemaService->>Redis: publish("cinema.seat_held", {...})
-    Redis->>Gateway: subscribe("cinema.seat_held")
-    Gateway->>Client: emit("seat_held", {...})
+    Client->>Gateway: emit("hold_seat", {...})
+    Gateway->>RedisPubSub: publish("gateway.hold_seat", {...})
+    RedisPubSub->>CinemaService: subscribe("gateway.hold_seat")
+    CinemaService->>RedisCache: SET hold:seat_123 EX 30
+    CinemaService->>RedisPubSub: publish("cinema.seat_held", {...})
+    RedisPubSub->>Gateway: subscribe("cinema.seat_held")
+    Gateway->>RedisAdapter: broadcast("seat_held", {...})
+    RedisAdapter->>Client: emit("seat_held", {...})
 ```
 
 ---
