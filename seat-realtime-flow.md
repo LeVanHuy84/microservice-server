@@ -122,21 +122,48 @@ Luồng này mô phỏng quy trình **đặt ghế xem phim realtime** giữa nh
 
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant Gateway
-    participant RedisPubSub
-    participant RedisCache
-    participant RedisAdapter
-    participant CinemaService
+    autonumber
+    participant Client as 🎟️ Client (Frontend)
+    participant Gateway as 🌐 RealtimeGateway (API Gateway)
+    participant Redis as 🧩 Redis Pub/Sub + Cache
+    participant Cinema as 🎞️ RealtimeService (Cinema Service)
 
-    Client->>Gateway: emit("hold_seat", {...})
-    Gateway->>RedisPubSub: publish("gateway.hold_seat", {...})
-    RedisPubSub->>CinemaService: subscribe("gateway.hold_seat")
-    CinemaService->>RedisCache: SET hold:seat_123 EX 30
-    CinemaService->>RedisPubSub: publish("cinema.seat_held", {...})
-    RedisPubSub->>Gateway: subscribe("cinema.seat_held")
-    Gateway->>RedisAdapter: broadcast("seat_held", {...})
-    RedisAdapter->>Client: emit("seat_held", {...})
+    Note over Client,Gateway: 🟢 HOLD SEAT
+    Client->>Gateway: emit("hold_seat", {showtimeId, seatId})
+    Gateway->>Redis: publish("gateway.hold_seat", {...})
+    Redis-->>Cinema: "gateway.hold_seat" event
+    Cinema->>Redis: set hold:showtime:{showtimeId}:{seatId}<br/>set hold:user:{userId}:showtime:{showtimeId}<br/>set hold:session:{userId} (TTL 300s)
+    Cinema->>Redis: publish("cinema.seat_held", {...})
+    Redis-->>Gateway: "cinema.seat_held" event
+    Gateway->>Client: emit("seat_held", {...}) to all clients in room(showtimeId)
+    Note right of Client: Ghế chuyển sang trạng thái “Đang được giữ”
+
+    %% RELEASE SEAT
+    Note over Client,Gateway: 🔵 RELEASE SEAT
+    Client->>Gateway: emit("release_seat", {showtimeId, seatId})
+    Gateway->>Redis: publish("gateway.release_seat", {...})
+    Redis-->>Cinema: "gateway.release_seat" event
+    Cinema->>Redis: del hold:showtime:{showtimeId}:{seatId}<br/>update hold:user:{userId}:showtime:{showtimeId}<br/>del session nếu trống
+    Cinema->>Redis: publish("cinema.seat_released", {...})
+    Redis-->>Gateway: "cinema.seat_released"
+    Gateway->>Client: emit("seat_released", {...}) to room(showtimeId)
+    Note right of Client: Ghế trở lại trạng thái “Trống”
+
+    %% EXPIRE SEAT
+    Note over Redis,Cinema: 🔴 EXPIRE SEAT (TTL hết hạn)
+    Redis->>Cinema: keyevent "__keyevent@0__:expired" → hold:session:{userId}
+    Cinema->>Redis: del all hold:user:{userId}:showtime:*
+    Cinema->>Redis: publish("cinema.seat_expired", {...})
+    Redis-->>Gateway: "cinema.seat_expired"
+    Gateway->>Client: emit("seat_expired", {...}) to all clients in showtime
+    Note right of Client: Ghế tự động trả lại khi hết thời gian giữ
+
+    %% LIMIT REACHED
+    Note over Cinema,Gateway: 🟠 LIMIT REACHED (user giữ > 8 ghế)
+    Cinema->>Redis: publish("cinema.seat_limit_reached", {...})
+    Redis-->>Gateway: "cinema.seat_limit_reached"
+    Gateway->>Client: emit("limit_reached", {...}) to user
+    Note right of Client: Hiển thị cảnh báo vượt giới hạn 8 ghế
 ```
 
 ---
