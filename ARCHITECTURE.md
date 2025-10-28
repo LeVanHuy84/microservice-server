@@ -135,61 +135,33 @@ flowchart TB
 ## 3. Thiết kế ERD
 
 ``` mermaid
-@startuml
-package "user-service" {
-  entity USER {
-    * id : UUID
-    --
-    full_name : string
-    email : string
-    password : string
-    role : enum
-    created_at : timestamp
-  }
+flowchart LR
 
-  entity DRIVER_PROFILE {
-    * id : UUID
-    --
-    user_id : UUID
-    vehicle_type : string
-    license_plate : string
-    license_number : string
-  }
+    %% ===== USER SERVICE =====
+    subgraph UserService["🧍‍♂️ User Service"]
+        class UserService userService
 
-  USER ||--o{ DRIVER_PROFILE : "has"
-}
+        USER["USER<br>———<br>id : uuid (PK)<br>full_name : string<br>email : string<br>password : string<br>role : enum<br>created_at : timestamp"]
+        DRIVER_PROFILE["DRIVER_PROFILE<br>———<br>id : uuid (PK)<br>user_id : uuid (FK)<br>vehicle_type : string<br>license_plate : string<br>license_number : string"]
 
-package "trip-service" {
-  entity TRIP {
-    * id : UUID
-    --
-    passenger_id : UUID
-    driver_id : UUID
-    origin_lat : float
-    origin_lng : float
-    destination_lat : float
-    destination_lng : float
-    estimated_fare : float
-    status : enum
-    created_at : timestamp
-  }
+        USER -->|"has"| DRIVER_PROFILE
+    end
 
-  entity TRIP_RATING {
-    * id : UUID
-    --
-    trip_id : UUID
-    passenger_id : UUID
-    driver_id : UUID
-    rating : int
-    feedback : string
-  }
+    %% ===== TRIP SERVICE =====
+    subgraph TripService["🚗 Trip Service"]
+        class TripService tripService
 
-  TRIP ||--o{ TRIP_RATING : "rated by passenger"
-}
+        TRIP["TRIP<br>———<br>id : uuid (PK)<br>passenger_id : uuid (FK)<br>driver_id : uuid (FK)<br>origin_lat : float<br>origin_lng : float<br>destination_lat : float<br>destination_lng : float<br>estimated_fare : float<br>status : enum<br>created_at : timestamp"]
 
-USER ||--o{ TRIP : "as passenger"
-DRIVER_PROFILE ||--o{ TRIP : "as driver"
-@enduml
+        TRIP_RATING["TRIP_RATING<br>———<br>id : uuid (PK)<br>trip_id : uuid (FK)<br>passenger_id : uuid (FK)<br>driver_id : uuid (FK)<br>rating : int<br>feedback : string"]
+
+        TRIP -->|"rated by passenger"| TRIP_RATING
+    end
+
+    %% ===== CROSS-SERVICE RELATIONS =====
+    USER -->|"as passenger"| TRIP
+    DRIVER_PROFILE -->|"as driver"| TRIP
+
 ```
 
 > **Tóm lại:**
