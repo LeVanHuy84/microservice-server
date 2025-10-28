@@ -135,59 +135,61 @@ flowchart TB
 ## 3. Thiết kế ERD
 
 ``` mermaid
-erDiagram
-    %% === USER SERVICE ===
-    package "user-service" {
-        USER {
-            uuid id PK
-            string full_name
-            string email
-            string password
-            enum role
-            timestamp created_at
-        }
+@startuml
+package "user-service" {
+  entity USER {
+    * id : UUID
+    --
+    full_name : string
+    email : string
+    password : string
+    role : enum
+    created_at : timestamp
+  }
 
-        DRIVER_PROFILE {
-            uuid id PK
-            uuid user_id FK
-            string vehicle_type
-            string license_plate
-            string license_number
-        }
+  entity DRIVER_PROFILE {
+    * id : UUID
+    --
+    user_id : UUID
+    vehicle_type : string
+    license_plate : string
+    license_number : string
+  }
 
-        USER ||--o{ DRIVER_PROFILE : "has"
-    }
+  USER ||--o{ DRIVER_PROFILE : "has"
+}
 
-    %% === TRIP SERVICE ===
-    package "trip-service" {
-        TRIP {
-            uuid id PK
-            uuid passenger_id FK
-            uuid driver_id FK
-            float origin_lat
-            float origin_lng
-            float destination_lat
-            float destination_lng
-            float estimated_fare
-            enum status
-            timestamp created_at
-        }
+package "trip-service" {
+  entity TRIP {
+    * id : UUID
+    --
+    passenger_id : UUID
+    driver_id : UUID
+    origin_lat : float
+    origin_lng : float
+    destination_lat : float
+    destination_lng : float
+    estimated_fare : float
+    status : enum
+    created_at : timestamp
+  }
 
-        TRIP_RATING {
-            uuid id PK
-            uuid trip_id FK
-            uuid passenger_id FK
-            uuid driver_id FK
-            int rating
-            string feedback
-        }
+  entity TRIP_RATING {
+    * id : UUID
+    --
+    trip_id : UUID
+    passenger_id : UUID
+    driver_id : UUID
+    rating : int
+    feedback : string
+  }
 
-        TRIP ||--o{ TRIP_RATING : "rated by passenger"
-    }
+  TRIP ||--o{ TRIP_RATING : "rated by passenger"
+}
 
-    %% === CROSS-SERVICE RELATIONS ===
-    USER ||--o{ TRIP : "as passenger"
-    DRIVER_PROFILE ||--o{ TRIP : "as driver"
+USER ||--o{ TRIP : "as passenger"
+DRIVER_PROFILE ||--o{ TRIP : "as driver"
+@enduml
 ```
 
 > **Tóm lại:**
