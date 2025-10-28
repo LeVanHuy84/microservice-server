@@ -135,32 +135,31 @@ flowchart TB
 ## 3. Data Schema
 ### 3.1 User-service schema
 ``` mermaid
-erDiagram
-flowchart LR
-    subgraph USER["USER"]
-        U1[id: uuid (PK)]
-        U2[email: string (unique)]
-        U3[full_name: string]
-        U4[password: string]
-        U5[role: enum(UserRole: passenger|driver)]
-        U6[phone: string?]
-        U7[created_at: timestamp (default now)]
-        U8[updated_at: timestamp (auto)]
+flowchart TB
+    subgraph USER
+        U1["id (uuid, PK)"]
+        U2["email (string, unique)"]
+        U3["full_name (string)"]
+        U4["password (string)"]
+        U5["role (enum: passenger | driver)"]
+        U6["phone (string, optional)"]
+        U7["created_at (timestamp, default now)"]
+        U8["updated_at (timestamp, auto)"]
     end
 
-    subgraph DRIVER_PROFILE["DRIVER_PROFILE"]
-        D1[id: uuid (PK)]
-        D2[user_id: uuid (FK → USER.id, unique)]
-        D3[license_number: string]
-        D4[vehicle_type: enum(VehicleType: MOTORBIKE|CAR_4_SEATS|CAR_7_SEATS)]
-        D5[vehicle_brand: string]
-        D6[vehicle_model: string]
-        D7[license_plate: string]
-        D8[created_at: timestamp (default now)]
-        D9[updated_at: timestamp (auto)]
+    subgraph DRIVER_PROFILE
+        D1["id (uuid, PK)"]
+        D2["user_id (uuid, FK → USER.id, unique)"]
+        D3["license_number (string)"]
+        D4["vehicle_type (enum: MOTORBIKE | CAR_4_SEATS | CAR_7_SEATS)"]
+        D5["vehicle_brand (string)"]
+        D6["vehicle_model (string)"]
+        D7["license_plate (string)"]
+        D8["created_at (timestamp, default now)"]
+        D9["updated_at (timestamp, auto)"]
     end
 
-    USER -->|1:1| DRIVER_PROFILE
+    USER -->|"1:1"| DRIVER_PROFILE
 ```
 ### 3.2. Trip-service schema
 ``` mermaid
@@ -190,7 +189,7 @@ flowchart LR
         R7[created_at: timestamp]
     end
 
-    TRIP -->|1:1| TRIP_RATING
+    TRIP -->|"1:1"| TRIP_RATING
 ```
 
 > **Tóm lại:**
