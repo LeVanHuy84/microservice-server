@@ -144,6 +144,7 @@ flowchart LR
 
         DRIVER_PROFILE["DRIVER_PROFILE<br>———<br>id : uuid (PK)<br>user_id : uuid (FK → USER.id, unique)<br>license_number : string<br>vehicle_type : enum(VehicleType)<br>vehicle_brand : string<br>vehicle_model : string<br>license_plate : string<br>created_at : timestamp [default: now()]<br>updated_at : timestamp [on update]"]
 
+        USER --- DRIVER_PROFILE
         %% Relationship
         USER -->|"1 — 1 (driverProfile)"| DRIVER_PROFILE
     end
@@ -160,6 +161,7 @@ flowchart LR
 
         TRIP_RATING["TRIP_RATING<br>———<br>id : uuid (PK)<br>trip_id : uuid (FK → TRIP.id)<br>passenger_id : uuid (FK → USER.id)<br>driver_id : uuid (FK → USER.id)<br>rating : int (1–5)<br>feedback : string (nullable)<br>created_at : timestamp [default: now()]"]
 
+        TRIP --- TRIP_RATING
         %% Relationships
         TRIP -->|"1 — n (rated)"| TRIP_RATING
     end
