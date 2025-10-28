@@ -135,61 +135,34 @@ flowchart TB
 ## 3. Data Schema
 ### 3.1 User-service schema
 ``` mermaid
-flowchart TB
-    subgraph USER
-        U1["id (uuid, PK)"]
-        U2["email (string, unique)"]
-        U3["full_name (string)"]
-        U4["password (string)"]
-        U5["role (enum: passenger | driver)"]
-        U6["phone (string, optional)"]
-        U7["created_at (timestamp, default now)"]
-        U8["updated_at (timestamp, auto)"]
+flowchart LR
+    %% ===== USER SERVICE =====
+    subgraph UserService["User Service"]
+        class UserService userService
+
+        USER["USER<br>———<br>id : uuid (PK)<br>email : string (unique)<br>full_name : string<br>password : string<br>role : enum(UserRole) [default: passenger]<br>phone : string (nullable)<br>created_at : timestamp [default: now()]<br>updated_at : timestamp [on update]"]
+
+        DRIVER_PROFILE["DRIVER_PROFILE<br>———<br>id : uuid (PK)<br>user_id : uuid (FK → USER.id, unique)<br>license_number : string<br>vehicle_type : enum(VehicleType)<br>vehicle_brand : string<br>vehicle_model : string<br>license_plate : string<br>created_at : timestamp [default: now()]<br>updated_at : timestamp [on update]"]
+
+        %% Relationship
+        USER -->|"1 — 1 (driverProfile)"| DRIVER_PROFILE
     end
 
-    subgraph DRIVER_PROFILE
-        D1["id (uuid, PK)"]
-        D2["user_id (uuid, FK → USER.id, unique)"]
-        D3["license_number (string)"]
-        D4["vehicle_type (enum: MOTORBIKE | CAR_4_SEATS | CAR_7_SEATS)"]
-        D5["vehicle_brand (string)"]
-        D6["vehicle_model (string)"]
-        D7["license_plate (string)"]
-        D8["created_at (timestamp, default now)"]
-        D9["updated_at (timestamp, auto)"]
-    end
-
-    USER -->|"1:1"| DRIVER_PROFILE
 ```
 ### 3.2. Trip-service schema
 ``` mermaid
 flowchart LR
-    subgraph TRIP["TRIP"]
-        T1[id: uuid (PK)]
-        T2[passenger_id: uuid]
-        T3[driver_id: uuid?]
-        T4[vehicle_type: enum(VehicleType: MOTORBIKE|CAR_4_SEATS|CAR_7_SEATS)]
-        T5[origin_lat: float]
-        T6[origin_lng: float]
-        T7[destination_lat: float]
-        T8[destination_lng: float]
-        T9[estimated_fare: decimal]
-        T10[status: enum(TripStatus)]
-        T11[created_at: timestamp]
-        T12[updated_at: timestamp]
-    end
+    %% ===== TRIP SERVICE =====
+    subgraph TripService["Trip Service"]
+        class TripService tripService
 
-    subgraph TRIP_RATING["TRIP_RATING"]
-        R1[id: uuid (PK)]
-        R2[trip_id: uuid (FK → TRIP.id)]
-        R3[driver_id: uuid]
-        R4[passenger_id: uuid]
-        R5[rating: int (1–5)]
-        R6[feedback: string?]
-        R7[created_at: timestamp]
-    end
+        TRIP["TRIP<br>———<br>id : uuid (PK)<br>passenger_id : uuid (FK → USER.id)<br>driver_id : uuid (FK → USER.id, nullable)<br>vehicle_type : enum(VehicleType) [default: MOTORBIKE]<br>origin_lat : float<br>origin_lng : float<br>destination_lat : float<br>destination_lng : float<br>estimated_fare : decimal(10,2)<br>status : enum(TripStatus) [default: SEARCHING]<br>created_at : timestamp [default: now()]<br>updated_at : timestamp [on update]"]
 
-    TRIP -->|"1:1"| TRIP_RATING
+        TRIP_RATING["TRIP_RATING<br>———<br>id : uuid (PK)<br>trip_id : uuid (FK → TRIP.id)<br>passenger_id : uuid (FK → USER.id)<br>driver_id : uuid (FK → USER.id)<br>rating : int (1–5)<br>feedback : string (nullable)<br>created_at : timestamp [default: now()]"]
+
+        %% Relationships
+        TRIP -->|"1 — n (rated)"| TRIP_RATING
+    end
 ```
 
 > **Tóm lại:**
