@@ -138,13 +138,13 @@ flowchart TB
 flowchart LR
     %% ===== USER SERVICE =====
     subgraph UserService["User Service"]
-        class UserService userService
+    direction LR
+    class UserService userService
 
         USER["USER<br>———<br>id : uuid (PK)<br>email : string (unique)<br>full_name : string<br>password : string<br>role : enum(UserRole) [default: passenger]<br>phone : string (nullable)<br>created_at : timestamp [default: now()]<br>updated_at : timestamp [on update]"]
 
         DRIVER_PROFILE["DRIVER_PROFILE<br>———<br>id : uuid (PK)<br>user_id : uuid (FK → USER.id, unique)<br>license_number : string<br>vehicle_type : enum(VehicleType)<br>vehicle_brand : string<br>vehicle_model : string<br>license_plate : string<br>created_at : timestamp [default: now()]<br>updated_at : timestamp [on update]"]
 
-        USER --- DRIVER_PROFILE
         %% Relationship
         USER -->|"1 — 1 (driverProfile)"| DRIVER_PROFILE
     end
