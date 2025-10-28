@@ -132,35 +132,66 @@ flowchart TB
 
 ---
 
-## 3. Thiết kế ERD
-
+## 3. Data Schema
+### 3.1 User-service schema
 ``` mermaid
-flowchart LR
+erDiagram
+    USER {
+        uuid id PK
+        string email "Unique"
+        string full_name
+        string password
+        enum role "UserRole: passenger | driver"
+        string phone "Optional"
+        timestamp created_at "default: now()"
+        timestamp updated_at "auto-updated"
+    }
 
-    %% ===== USER SERVICE =====
-    subgraph UserService["🧍‍♂️ User Service"]
-        class UserService userService
+    DRIVER_PROFILE {
+        uuid id PK
+        uuid user_id FK "Unique"
+        string license_number
+        enum vehicle_type "VehicleType: MOTORBIKE | CAR_4_SEATS | CAR_7_SEATS"
+        string vehicle_brand
+        string vehicle_model
+        string license_plate
+        timestamp created_at "default: now()"
+        timestamp updated_at "auto-updated"
+    }
 
-        USER["USER<br>———<br>id : uuid (PK)<br>full_name : string<br>email : string<br>password : string<br>role : enum<br>created_at : timestamp"]
-        DRIVER_PROFILE["DRIVER_PROFILE<br>———<br>id : uuid (PK)<br>user_id : uuid (FK)<br>vehicle_type : string<br>license_plate : string<br>license_number : string"]
+    %% Relationship
+    USER ||--|| DRIVER_PROFILE : "has (1:1)"
+```
+### 3.2. Trip-service schema
+``` mermaid
+erDiagram
+    TRIP {
+        uuid id PK
+        uuid passenger_id "ID hành khách"
+        uuid driver_id "ID tài xế (nullable)"
+        enum vehicle_type "VehicleType: MOTORBIKE | CAR_4_SEATS | CAR_7_SEATS"
+        float origin_lat "Vĩ độ điểm đón"
+        float origin_lng "Kinh độ điểm đón"
+        float destination_lat "Vĩ độ điểm đến"
+        float destination_lng "Kinh độ điểm đến"
+        decimal estimated_fare "Đơn giá ước tính"
+        enum status "TripStatus: SEARCHING | ACCEPTED | ENROUTE_TO_PICKUP | IN_PROGRESS | COMPLETED | CANCELLED"
+        timestamp created_at "Thời điểm tạo"
+        timestamp updated_at "Thời điểm cập nhật"
+    }
 
-        USER -->|"has"| DRIVER_PROFILE
-    end
+    TRIP_RATING {
+        uuid id PK
+        uuid trip_id FK
+        uuid driver_id "ID tài xế"
+        uuid passenger_id "ID hành khách"
+        int rating "Điểm đánh giá (1–5)"
+        string feedback "Nhận xét (tùy chọn)"
+        timestamp created_at "Thời điểm tạo"
+    }
 
-    %% ===== TRIP SERVICE =====
-    subgraph TripService["🚗 Trip Service"]
-        class TripService tripService
-
-        TRIP["TRIP<br>———<br>id : uuid (PK)<br>passenger_id : uuid (FK)<br>driver_id : uuid (FK)<br>origin_lat : float<br>origin_lng : float<br>destination_lat : float<br>destination_lng : float<br>estimated_fare : float<br>status : enum<br>created_at : timestamp"]
-
-        TRIP_RATING["TRIP_RATING<br>———<br>id : uuid (PK)<br>trip_id : uuid (FK)<br>passenger_id : uuid (FK)<br>driver_id : uuid (FK)<br>rating : int<br>feedback : string"]
-
-        TRIP -->|"rated by passenger"| TRIP_RATING
-    end
-
-    %% ===== CROSS-SERVICE RELATIONS =====
-    USER -->|"as passenger"| TRIP
-    DRIVER_PROFILE -->|"as driver"| TRIP
+    %% Relationship
+    TRIP ||--|| TRIP_RATING : "has (1:1)"
 
 ```
 
