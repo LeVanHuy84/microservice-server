@@ -6,7 +6,7 @@ flowchart TB
 %% CLIENT
 %% =====================
 subgraph CLIENT["Client Layer"]
-  direction LR
+  direction TB
   Client["Client App / Web"]
 end
 
@@ -14,7 +14,7 @@ end
 %% GATEWAY
 %% =====================
 subgraph GATEWAY["API Gateway Layer"]
-  direction LR
+  direction TB
   APIGW["API Gateway Node"]
 end
 
@@ -22,7 +22,7 @@ end
 %% CORE SERVICES
 %% =====================
 subgraph SERVICES["Core Services"]
-  direction LR
+  direction TB
 
   User["User Service"]
   Social["Social Service"]
@@ -39,7 +39,7 @@ end
 %% INFRASTRUCTURE
 %% =====================
 subgraph INFRA["Infrastructure"]
-  direction LR
+  direction TB
 
   PostgreSQL["PostgreSQL"]
   MongoDB["MongoDB"]
