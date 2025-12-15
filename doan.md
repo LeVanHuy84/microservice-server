@@ -55,7 +55,7 @@ end
 %% CONNECTIONS
 %% =====================
 Client -->|REST / WebSocket| APIGW
-APIGW --> |TCP|  Services
+APIGW --> |TCP| Services
 
 Services --> Infrastructure
 ```
