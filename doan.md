@@ -6,6 +6,7 @@ flowchart TB
 %% CLIENT
 %% =====================
 subgraph CLIENT["Client Layer"]
+  direction LR
   Client["Client App / Web"]
 end
 
@@ -13,6 +14,7 @@ end
 %% GATEWAY
 %% =====================
 subgraph GATEWAY["API Gateway Layer"]
+  direction LR
   APIGW["API Gateway Node"]
 end
 
@@ -55,7 +57,7 @@ end
 %% CONNECTIONS
 %% =====================
 CLIENT -->|REST / WebSocket| GATEWAY
-GATEWAY --> |TCP| SERVICES
-
+GATEWAY -->|TCP| SERVICES
 SERVICES --> INFRA
+
 ```
